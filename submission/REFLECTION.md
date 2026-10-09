@@ -28,8 +28,8 @@
 
 | Chỉ số | Giá trị |
 |---|---:|
-| Thời gian huấn luyện NB3 | NB3 chạy 100 bước (800 cặp, 1 epoch); cả notebook NB0–NB4 + 08 chạy trong khoảng 1 giờ 31 phút trên Kaggle T4 (số đo của cả phiên, chưa tách riêng NB3) |
-| VRAM cao nhất | vừa trong 15 GB của 1 T4 (4-bit + LoRA, MAX_LEN 768); chưa có số đỉnh chính xác |
+| Thời gian huấn luyện NB3 | ~1,5 giờ cho cả notebook trên Kaggle T4 (Kaggle không hiển thị thời gian riêng của NB3) |
+| VRAM cao nhất | Vừa trong 15 GB của 1 T4 (Kaggle không hiển thị số đỉnh) |
 | Reward gap cuối trên tập huấn luyện (chosen − rejected) | 0.092 |
 | Độ chính xác reward trên held-out | 0.680 |
 | Margin trên held-out | 0.082 |
