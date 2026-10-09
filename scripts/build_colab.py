@@ -30,6 +30,8 @@ STAGES = [
     ("07_grpo_bonus", "bonus"),
 ]
 TARGETS = {"T4": "Lab22_DPO_T4.ipynb", "BIGGPU": "Lab22_DPO_BigGPU.ipynb"}
+# Standalone notebook, run in the same Colab session after the T4 notebook (it reads /content/lab22).
+FINALIZE = "Lab22_Finalize.ipynb"
 CELL = re.compile(r"^# %%(?P<md> \[markdown\])?.*$", re.MULTILINE)
 
 
@@ -93,6 +95,26 @@ RELEASE_GPU = (
 )
 
 
+def finalize_nb() -> dict:
+    head = (
+        "# Lab 22 — Hoàn tất (chạy SAU `Lab22_DPO_T4.ipynb`, cùng phiên Colab)\n\n"
+        "Tự điền `submission/REFLECTION.md` từ số liệu thật và tải `lab22_submission.zip` về máy. "
+        "Cần thư mục `/content/lab22` còn tồn tại từ lần chạy NB0–NB4."
+    )
+    setup = (
+        "import os\n"
+        f'os.chdir("{WORKDIR}")\n'
+        "assert os.path.exists('lab22/config.py'), 'Chạy Lab22_DPO_T4.ipynb trước (cùng phiên Colab).'"
+    )
+    cells = [md(head), code(setup), *percent_cells(REPO / "notebooks" / "08_finalize.py")]
+    return {
+        "cells": cells,
+        "metadata": {"kernelspec": {"display_name": "Python 3", "name": "python3"}, "language_info": {"name": "python"}},
+        "nbformat": 4,
+        "nbformat_minor": 5,
+    }
+
+
 def render(tier: str) -> dict:
     big = tier == "BIGGPU"
     pins = " ".join(f'"{s}"' for s in requirements())
@@ -153,9 +175,9 @@ def main() -> int:
     parser.add_argument("--check", action="store_true", help="fail if colab/*.ipynb differ from the sources")
     args = parser.parse_args()
     stale = []
-    for tier, name in TARGETS.items():
+    for tier, name in [*TARGETS.items(), ("T4", FINALIZE)]:
         path = REPO / "colab" / name
-        nb = render(tier)
+        nb = finalize_nb() if name == FINALIZE else render(tier)
         if args.check:
             if not path.exists() or json.loads(path.read_text(encoding="utf-8")) != nb:
                 stale.append(name)
