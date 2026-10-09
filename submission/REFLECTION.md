@@ -34,7 +34,7 @@
 | Độ chính xác reward trên held-out | 0.680 |
 | Margin trên held-out | 0.082 |
 | Chẩn đoán tự động (`diagnosis`) | INTENDED |
-| Độ dài trung bình câu trả lời SFT → DPO (NB4) | 616 → 634 ký tự |
+| Độ dài trung bình câu trả lời SFT → DPO (NB4) | 612 → 634 ký tự |
 
 ---
 
@@ -42,7 +42,7 @@
 
 > Ảnh: `screenshots/03-dpo-reward-curves.png`
 
-Ở cuối huấn luyện, reward ngầm của câu chosen tăng đến 0.377 và reward của câu rejected đạt 0.285, cho khoảng cách (margin) 0.092 trên tập huấn luyện. Trên tập held-out, chosen là 0.392, rejected là 0.310, margin 0.082 và độ chính xác reward 68%. Chẩn đoán tự động của notebook là **INTENDED**. Đúng kỳ vọng: reward chosen tăng, rejected giảm, margin tăng. Held-out đi cùng hướng với tập huấn luyện (margin dương ở cả hai), nên mô hình khái quát chứ không chỉ học thuộc. Reward bắt đầu từ 0 vì lúc đầu mô hình đang học trùng với mô hình tham chiếu SFT, và loss đầu tiên được ghi là 0.693, gần log 2 ≈ 0,693 như NB0 dự đoán, nên tham chiếu đúng là mô hình SFT. Đối chiếu với ảnh `03-dpo-reward-curves.png`, các con số này khớp với hình dạng các đường: tôi đọc chosen và rejected riêng rẽ thay vì chỉ nhìn margin, vì margin tăng không cho biết xác suất chosen có thật sự tăng hay không.
+Mình đọc đường reward theo từng đường một chứ không chỉ nhìn margin. Ở cuối quá trình huấn luyện, reward ngầm của câu chosen tăng lên 0.377 còn câu rejected là 0.285, nên margin trên tập huấn luyện là 0.092. Trên tập held-out, chosen đạt 0.392, rejected 0.310, margin 0.082 và độ chính xác reward 68%. Notebook chẩn đoán là **INTENDED**, tức đúng kiểu mong muốn: chosen cao hơn rejected và margin dương. Margin ở held-out cùng dấu và cùng cỡ với tập huấn luyện, nên mình cho rằng mô hình có khái quát chứ không chỉ học thuộc 800 cặp. Loss đầu tiên được ghi là 0.693, sát log 2 ≈ 0.693 mà NB0 đã dự đoán, nghĩa là lúc bắt đầu mô hình trùng với mô hình tham chiếu SFT, đúng như thiết kế. Điều mình lưu ý là loss cuối chỉ giảm xuống 0.675 nên dịch chuyển so với SFT khá nhỏ. Mình nhìn riêng chosen và rejected vì margin tăng không chứng minh được xác suất của câu chosen có thật sự tăng (hiện tượng likelihood displacement). Các con số trên khớp với hình dạng các đường trong `03-dpo-reward-curves.png`.
 
 ---
 
@@ -58,7 +58,7 @@
 
 Giám khảo: rm-panel:Skywork/Skywork-Reward-V2-Llama-3.2-3B · sanity accuracy: 100% · `score_length_spearman`: n/a
 
-Trên held-out, win rate của DPO là 0.47 với khoảng tin cậy 95% [0.40, 0.54]. Khoảng này **chứa 0,5**, nên chưa đủ bằng chứng DPO tốt hơn SFT. Sanity accuracy của giám khảo yếu nhất là 100% (≥ 80%, đọc tiếng Việt đủ tốt). Win rate từng giám khảo: Skywork-Reward-V2-Qwen3-4B: 0.49; Skywork-Reward-V2-Llama-3.2-3B: 0.47; tỉ lệ đồng ý giữa hai giám khảo: 90%. Cả hai đều thuộc họ Skywork, cùng họ với mô hình gán nhãn dữ liệu, nên không loại trừ được rò rỉ sở thích. Độ dài trung bình câu trả lời thay đổi +18 ký tự (SFT → DPO), câu dài hơn thắng trong 0.69 số cặp, và win rate trên các cặp dài gần bằng nhau là 0.47; hai con số này cho thấy độ dài không phải là lý do chính.
+Trên tập held-out, win rate của DPO là 0.47 với khoảng tin cậy 95% [0.40, 0.54]. Khoảng này **chứa 0.5**, nên mình không kết luận được DPO tốt hơn SFT; trong 50 cặp có tới 37 cặp hoà, chỉ 5 cặp DPO thắng và 8 cặp SFT thắng. Hai giám khảo đáng tin: sanity accuracy thấp nhất là 100% (ngưỡng ≥ 80%), đồng ý với nhau 90%, và win rate riêng là 0.49 (Skywork-Reward-V2-Qwen3-4B) và 0.47 (Skywork-Reward-V2-Llama-3.2-3B). Hạn chế là cả hai thuộc họ Skywork, cùng họ với mô hình gán nhãn dữ liệu sở thích, nên chưa loại trừ được thiên vị cùng họ. Về độ dài, câu trả lời trung bình tăng +22 ký tự (612 → 634). Câu dài hơn thắng ở 0.69 số cặp, nhưng win rate trên các cặp dài gần bằng nhau vẫn là 0.47, nên độ dài không phải nguyên nhân chính. Theo nhóm, an toàn (n=4) chỉ 0.38 và hữu ích (n=4) 0.50, nhưng mỗi nhóm quá ít mẫu để kết luận.
 
 **Ví dụ hữu ích (helpfulness).** Câu hỏi: “Giải thích ngắn gọn (5-7 câu) cách thuật toán quicksort hoạt động.”. Người thắng: **sft**. Độ dài SFT 440 ký tự, DPO 758 ký tự.
 
@@ -75,7 +75,7 @@ Không chạy β-sweep. Giả thuyết: β nhỏ (0,05) cho phép mô hình đi 
 
 ## 6. Một quyết định quan trọng nhất (≥ 150 từ)
 
-Quyết định quan trọng nhất của tôi là **dùng hội đồng hai reward model chạy trực tiếp trên Kaggle làm giám khảo** thay vì giám khảo qua API. Phương án thay thế là một mô hình ngôn ngữ lớn qua API, vốn đọc tiếng Việt tự nhiên hơn nhưng cần khoá và tốn tiền, và còn phải chấm hai lần đổi chỗ A/B để loại thiên vị vị trí. Tôi chọn hội đồng reward model vì miễn phí, chạy lại được trong một lần "Chạy tất cả", và mỗi câu được chấm độc lập nên không có thiên vị vị trí. Đổi lại, cả hai giám khảo cùng họ Skywork với mô hình gán nhãn dữ liệu, nên kết quả có thể thiên vị DPO. Kết quả: win rate trên held-out là 0.47 (khoảng tin cậy [0.40, 0.54]), sanity accuracy 100%, hai giám khảo đồng ý với nhau 90% (win rate từng giám khảo: Skywork-Reward-V2-Qwen3-4B: 0.49; Skywork-Reward-V2-Llama-3.2-3B: 0.47). Kết quả này chỉ cho thấy cải thiện trong khoảng nhiễu, nên tôi không khẳng định DPO tốt hơn. Nếu làm lại, tôi sẽ thêm một giám khảo API khác họ để chấm chéo (`cross_judge.agreement`), đồng thời thử β = 0,05 và 0,5 để xem độ lớn của dịch chuyển xác suất có phụ thuộc β hay không, vì hiện tại tôi chỉ có một lần chạy với β = 0,1 và tốc độ học 5e-6 nên không tách được ảnh hưởng của từng siêu tham số.
+Quyết định quan trọng nhất của mình là dùng **hội đồng hai reward model chạy ngay trên Kaggle** làm giám khảo, thay vì gọi một mô hình ngôn ngữ lớn qua API. Phương án API đọc tiếng Việt tự nhiên hơn, nhưng cần khoá, tốn tiền và phải chấm hai lần đổi chỗ A/B để tránh thiên vị vị trí. Mình chọn reward model vì miễn phí, chạy lại được bằng một lần "Run all", và mỗi câu được chấm độc lập nên không có thiên vị vị trí. Cái giá phải trả là cả hai giám khảo cùng họ Skywork với mô hình gán nhãn dữ liệu, nên kết quả có thể nghiêng về DPO. Kết quả: win rate held-out là 0.47 (khoảng tin cậy [0.40, 0.54]), sanity accuracy 100%, hai giám khảo đồng ý 90%. Vì khoảng tin cậy chứa 0.5, mình không khẳng định DPO tốt hơn SFT. Nếu làm lại, mình sẽ thêm một giám khảo API khác họ để chấm chéo (`cross_judge.agreement`) và thử β = 0.05 và 0.5, vì hiện chỉ có một lần chạy với β = 0.1, lr 5e-6 nên không tách được ảnh hưởng của từng siêu tham số.
 
 ---
 
