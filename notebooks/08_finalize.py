@@ -309,9 +309,15 @@ with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
     print(*z.namelist(), sep="\n")
 print(f"\n{zip_path} ({zip_path.stat().st_size / 1e6:.1f} MB)")
 
+kaggle_out = Path("/kaggle/working")
+if kaggle_out.exists():  # Kaggle chỉ giữ file trong /kaggle/working; tải ở tab Output sau khi "Save Version"
+    import shutil
+
+    shutil.copy(zip_path, kaggle_out / zip_path.name)
+    print(f"Đã copy vào {kaggle_out / zip_path.name}")
 try:
     from google.colab import files
 
     files.download(str(zip_path))
 except ImportError:
-    print("Không phải Colab: lấy file zip ở đường dẫn trên.")
+    print("Không phải Colab: lấy file zip ở đường dẫn trên (Kaggle: tab Output).")
